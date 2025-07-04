@@ -1,0 +1,131 @@
+-- MySQL Workbench Forward Engineering with ENUMs and CHECKs
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table: Driver
+-- -----------------------------------------------------
+CREATE TABLE `Driver` (
+  `Driver_ID` INT NOT NULL AUTO_INCREMENT,
+  `Fullname` VARCHAR(45) NOT NULL,
+  `Phone` VARCHAR(15) NOT NULL,
+  `Birthdate` DATE NOT NULL,
+  `Emergency_Contact` VARCHAR(45) NOT NULL,
+  `Status` ENUM('Active', 'Suspended', 'Inactive') NOT NULL DEFAULT 'Active',
+  PRIMARY KEY (`Driver_ID`),
+  UNIQUE INDEX `Phone_UNIQUE` (`Phone`)
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table: Motorcycle
+-- -----------------------------------------------------
+CREATE TABLE `Motorcycle` (
+  `Motorcycle_ID` INT NOT NULL AUTO_INCREMENT,
+  `Driver_ID` INT NOT NULL,
+  `Plate_Number` VARCHAR(10) NOT NULL,
+  `Make_Brand` VARCHAR(20) NOT NULL,
+  `YearModel` YEAR NOT NULL,
+  `Color` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`Motorcycle_ID`),
+  UNIQUE INDEX `Plate_Number_UNIQUE` (`Plate_Number`),
+  INDEX `fk_Motorcycle_Driver_idx` (`Driver_ID`),
+  CONSTRAINT `fk_Motorcycle_Driver`
+    FOREIGN KEY (`Driver_ID`)
+    REFERENCES `Driver` (`Driver_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table: Customer
+-- -----------------------------------------------------
+CREATE TABLE `Customer` (
+  `Customer_ID` INT NOT NULL AUTO_INCREMENT,
+  `Fullname` VARCHAR(45),
+  `Phone` VARCHAR(15) NOT NULL,
+  PRIMARY KEY (`Customer_ID`)
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table: Ride_Details
+-- -----------------------------------------------------
+CREATE TABLE `Ride_Details` (
+  `Ride_ID` INT NOT NULL AUTO_INCREMENT,
+  `Driver_ID` INT NOT NULL,
+  `Customer_ID` INT NOT NULL,
+  `Pickup` VARCHAR(100) NOT NULL,
+  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Distance_km` DECIMAL(3,2) NOT NULL,
+  `Fare` INT NOT NULL,
+  `Payment_Method` ENUM('Cash', 'Card', 'Online') NOT NULL,
+  `Status` ENUM('Running', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Running',
+  PRIMARY KEY (`Ride_ID`),
+  INDEX `fk_Ride_Details_Driver_idx` (`Driver_ID`),
+  INDEX `fk_Ride_Details_Customer_idx` (`Customer_ID`),
+  CONSTRAINT `fk_Ride_Details_Driver`
+    FOREIGN KEY (`Driver_ID`)
+    REFERENCES `Driver` (`Driver_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Ride_Details_Customer`
+    FOREIGN KEY (`Customer_ID`)
+    REFERENCES `Customer` (`Customer_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table: Payment
+-- -----------------------------------------------------
+CREATE TABLE `Payment` (
+  `Payment_ID` INT NOT NULL AUTO_INCREMENT,
+  `Ride_ID` INT NOT NULL,
+  `Driver_ID` INT NOT NULL,
+  `Amount` INT NOT NULL,
+  `Commission` INT NOT NULL,
+  `Status` ENUM('Pending', 'Paid') NOT NULL DEFAULT 'Pending',
+  PRIMARY KEY (`Payment_ID`),
+  INDEX `fk_Payment_Ride_Details_idx` (`Ride_ID`),
+  INDEX `fk_Payment_Driver_idx` (`Driver_ID`),
+  CONSTRAINT `fk_Payment_Ride_Details`
+    FOREIGN KEY (`Ride_ID`)
+    REFERENCES `Ride_Details` (`Ride_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Payment_Driver`
+    FOREIGN KEY (`Driver_ID`)
+    REFERENCES `Driver` (`Driver_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table: Feedback
+-- -----------------------------------------------------
+CREATE TABLE `Feedback` (
+  `Feedback_ID` INT NOT NULL AUTO_INCREMENT,
+  `Ride_ID` INT NOT NULL,
+  `Comments` VARCHAR(255),
+  `Ratings` INT CHECK (`Ratings` BETWEEN 1 AND 5),
+  `Timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`Feedback_ID`),
+  INDEX `fk_Feedback_Ride_Details_idx` (`Ride_ID`),
+  CONSTRAINT `fk_Feedback_Ride_Details`
+    FOREIGN KEY (`Ride_ID`)
+    REFERENCES `Ride_Details` (`Ride_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- Restore SQL mode and checks
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
