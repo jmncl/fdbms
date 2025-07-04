@@ -63,7 +63,7 @@ CREATE TABLE `Ride_Details` (
   `Customer_ID` INT NOT NULL,
   `Pickup` VARCHAR(100) NOT NULL,
   `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `Distance_km` DECIMAL(3,2) NOT NULL,
+  `Distance_km` DECIMAL(5,2) NOT NULL,
   `Fare` INT NOT NULL,
   `Payment_Method` ENUM('Cash', 'Card', 'Online') NOT NULL,
   `Status` ENUM('Running', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Running',
