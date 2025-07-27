@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS Driver (
   Birthdate DATE NOT NULL,
   Emergency_Contact VARCHAR(45) NOT NULL,
   Status ENUM('Active', 'Suspended', 'Inactive') NOT NULL DEFAULT 'Active',
+  Password VARCHAR(255) NOT NULL, 
   PRIMARY KEY (Driver_ID),
   UNIQUE INDEX Phone_UNIQUE (Phone)
 ) ENGINE=InnoDB;
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS Customer (
   Customer_ID INT NOT NULL AUTO_INCREMENT,
   Fullname VARCHAR(45) NOT NULL,
   Phone VARCHAR(15) NOT NULL,
+  Password VARCHAR(255) NOT NULL,
   PRIMARY KEY (Customer_ID),
   UNIQUE INDEX Phone_UNIQUE (Phone)
 ) ENGINE=InnoDB;
